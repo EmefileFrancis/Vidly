@@ -158,9 +158,57 @@ app.post('/api/genres/', (req, res) => {
         "description": req.body.description
     }
     
+    validateGenre(req.body, res);
+
     genres.push(newGenre);
     res.send(newGenre);
 });
+
+app.put('/api/genres/:id', (req, res) => {
+    //Confirm if specified genre exist
+    const genre = genres.find( (c) => c.id === parseInt(req.params.id) );
+    if(!genre){
+        res.status(404).send("Genre with specified ID not found...");
+    }
+
+    //Validation
+    validateGenre(req.body, res);
+
+    genre.name = req.body.name;
+    genre.description = req.body.description;
+
+    res.send(genre);
+});
+
+app.delete('/api/genres/:id', (req, res) => {
+    //Confirm if specified genre exist
+    const genre = genres.find( (c) => c.id === parseInt(req.params.id) );
+    if(!genre){
+        res.status(404).send("Genre with specified ID not found...");
+        return;
+    }
+
+    const index = genres.indexOf(genre);
+    genres.splice(index, 1);
+    console.log(genres);
+    res.send(genre);
+});
+
+function validateGenre(reqBody, resp){
+    const schema = Joi.object().keys({
+        name: Joi.string().min(1).required(),
+        description: Joi.string().min(1).max(20).required()
+    });
+
+    Joi.validate(reqBody, schema, function(err, value){
+        console.log(err);
+        if(err !== null){
+            resp.status(400).send(err);
+            return;
+        }
+        
+    });
+}
 
 const port = process.env.port || 3000;
 app.listen(port, () => console.log(`Listening at port ${port}`));
