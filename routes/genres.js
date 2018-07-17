@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const apiDebug = require('debug')('app:api');
 const {Genre, validate} = require('../models/genre');
 
@@ -74,7 +75,7 @@ route.put('/:id', async (req, res) => {
     
 });
 
-route.delete('/:id', async (req, res) => {
+route.delete('/:id', [auth, admin] , async (req, res) => {
     try{
         //Confirm if specified genre exist
         const genre = await Genre.findByIdAndRemove(req.params.id)
